@@ -54,12 +54,12 @@ class Card:
 class PlayBoard:
     def __init__(self):
         self.card_positions = {
-            "Player": (-200, -200),  # Позиція тексту гравця
-            "Dealer": (-200, 200),  # Позиція тексту дилера
+            "Player": (-200, -200),  
+            "Dealer": (-200, 200),  
         }
         self.hand_positions = {
-            "Player": (+46, -438),  # Позиція карт гравця
-            "Dealer": (-0, 0),  # Позиція карт дилера
+            "Player": (+46, -438),  
+            "Dealer": (-0, 0),  
         }
         self.pen = turtle.Turtle()
         self.pen.speed(0)
@@ -69,7 +69,7 @@ class PlayBoard:
         position = self.hand_positions[player_name]
         x, y = position[0], position[1]
         card.render(x, y, self.pen)
-        self.hand_positions[player_name] = (x + 55, y)  # Збільшуємо значення x на 50 одиниць для наступної карти
+        self.hand_positions[player_name] = (x + 55, y)  
 
     def render_hand(self, player_name, hand):
         position = self.card_positions[player_name]
