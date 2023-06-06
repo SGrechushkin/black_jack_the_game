@@ -1,25 +1,21 @@
 
+
 import random
-from tkinter import SEL
+import tkinter as tk
+import turtle
 suits = ('\u2665', '\u2666', '\u2660', '\u2663')
 ranks = ('Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Jack', 'Queen', 'King', 'Ace')
+render_rank = {'Two':"2", 'Three':"3", 'Four':"4", 'Five':"5", 'Six':"6", 'Seven':"7", 'Eight':"8", 
+            'Nine':"9", 'Ten':"10", 'Jack':"J", 'Queen':"Q", 'King':"K", 'Ace':"A"}
 values = {'Two':2, 'Three':3, 'Four':4, 'Five':5, 'Six':6, 'Seven':7, 'Eight':8, 
             'Nine':9, 'Ten':10, 'Jack':10, 'Queen':10, 'King':10, 'Ace':[1,11]}
-import turtle
-wn = turtle.Screen()
-wn.bgcolor("green")
-wn.setup(800, 600)
-wn.title("Play Board")
-
-pen = turtle.Turtle()
-pen.speed(0)
-pen.hideturtle()
 
 class Card:
     #Creating cards
     def __init__(self,suit, rank):
         self.suit = suit
         self.rank = rank
+        self.render_rank = render_rank[rank]
         self.values= values[rank]
     def __str__(self):
         return self.rank + " of " + self.suit
@@ -27,7 +23,7 @@ class Card:
     def render(self, x, y, pen):
         pen.penup()
         pen.goto(x, y)
-        pen.color("black")
+        pen.color("white")
         pen.goto(x-100, y+250)
         pen.pendown()
         pen.goto(x-50, y+250)
@@ -39,7 +35,7 @@ class Card:
         pen.color("white")
         pen.goto(x-96, y+232)
         pen.pendown()
-        pen.write(self.rank, False, font =("Courier New", 13, "normal"))
+        pen.write(self.render_rank, False, font =("Courier New", 13, "normal"))
         pen.penup()
         pen.goto(x-96, y+218)
         pen.pendown()
@@ -50,50 +46,13 @@ class Card:
         pen.pendown()
         pen.write(self.suit, False, font =("Courier New", 25, "normal"))
         pen.penup()
-
-class PlayBoard:
-    def __init__(self):
-        self.card_positions = {
-            "Player": (-200, -200),  
-            "Dealer": (-200, 200),  
-        }
-        self.hand_positions = {
-            "Player": (+46, -438),  
-            "Dealer": (-0, 0),  
-        }
-        self.pen = turtle.Turtle()
-        self.pen.speed(0)
-        self.pen.hideturtle()
-
-    def render_card(self, player_name, card):
-        position = self.hand_positions[player_name]
-        x, y = position[0], position[1]
-        card.render(x, y, self.pen)
-        self.hand_positions[player_name] = (x + 55, y)  
-
-    def render_hand(self, player_name, hand):
-        position = self.card_positions[player_name]
-        x, y = position[0], position[1]
-        self.pen.penup()
-        self.pen.goto(x, y)
-        self.pen.pendown()
-        self.pen.write(f"{player_name}'s hand:", False, font=("Courier New", 13, "normal"))
-        self.pen.penup()
-        y -= 30
-        for card in hand:
-            self.pen.goto(x, y)
-            self.pen.pendown()
-            self.pen.write(str(card), False, font=("Courier New", 13, "normal"))
-            self.pen.penup()
-            y -= 20
-            
+           
 class Deck:
     #Creating deck
     def __init__(self):
         self.all_cards = []
         for suit in suits:
             for rank in ranks:
-                #Create the Card Object
                 created_card = Card(suit,rank)
                 self.all_cards.append(created_card)
     #Deck shuffle
@@ -113,15 +72,13 @@ class Player:
 
     def add_card(self, card):
         self.hand.append(card)
-        self.play_board.render_card(self.name, card) #working
-        #self.hand.render_card(self.name, card)
+        self.play_board.render_card_Player(self.name, card) #working
 
     def show_hand(self):
         self.play_board.render_hand(self.name, self.hand)
         print(f"{self.name}'s hand value {self.calculate_hand_value()}:")
         for card in self.hand:
             print(f"{card}, card value: {card.values}")
-        #self.play_board.render_card(self.name, card)
 
     def calculate_hand_value(self):
         hand_value = 0
@@ -141,8 +98,17 @@ class Player:
 
         return hand_value
 
+
     def has_lost(self):
         return self.calculate_hand_value() > 21
+        play_again = input("Do you want play_again? (y/n): ")
+        if play_again == 'y':
+            game_on = True
+        else:
+            game_on = False
+    
+    def __str__(self):
+        return self.calculate_hand_value
 
 class Dealer:
     #Creating dealer
@@ -151,16 +117,21 @@ class Dealer:
         self.hand = []
         self.play_board = play_board
 
+    def start_add_card(self, card):
+        self.hand.append(card)
+
     def add_card(self, card):
         self.hand.append(card)
-        self.play_board.render_card(self.name, card)
+        self.play_board.render_card_Dealer(self.name, card)
 
-    def show_hand(self,):
-        #self.play_board.render_card(self.name, card)
+    def show_hand(self):
         self.play_board.render_hand(self.name, self.hand)
         print(f"Dealer's hand value {self.calculate_hand_value()}:")
         for card in self.hand:
             print(f"{card}, card value: {card.values}")
+            if self.name == "Dealer" and len(self.hand) <=2:
+                self.play_board.render_card_Dealer(self.name, card)
+
 
     def calculate_hand_value(self):
         hand_value = 0
@@ -182,6 +153,70 @@ class Dealer:
 
     def has_lost(self):
         return self.calculate_hand_value() > 21
+        play_again = input("Do you want play_again? (y/n): ")
+        if play_again == 'y':
+            game_on = True
+        else:
+            game_on = False
+
+class PlayBoard:
+    def __init__(self):
+        self.card_positions = {
+            "Player": (-200, -200),  # Позиція тексту гравця
+            "Dealer": (-200, +230),  # Позиція тексту дилера
+        }
+        self.hand_positions = {
+            "Player": (+46, -435),  # Позиція карт гравця
+            "Dealer": (+46, 0),  # Позиція карт дилера
+        }
+        self.game_positions = {
+            "Player": (-0, -0),  # Позиція тексту гравця
+           
+        }
+        self.pen = turtle.Turtle()
+        self.pen.speed(0)
+        self.pen.hideturtle()
+        self.hit_button = None
+
+    def render_card_Player(self, Player, card):
+        position = self.hand_positions[Player]
+        x, y = position[0], position[1]
+        card.render(x, y, self.pen)
+        self.hand_positions[Player] = (x + 55, y)  # Збільшуємо значення x на 50 одиниць для наступної карти
+
+    def render_card_Dealer(self, player_name, card):
+        position = self.hand_positions[player_name]
+        x, y = position[0], position[1]
+        if player_name == "Dealer":
+            card.render(x, y, self.pen)
+        self.hand_positions[player_name] = (x + 55, y)  # Збільшуємо значення x на 50 одиниць для наступної карти"""
+
+    def render_hand(self, player_name, hand):
+        position = self.card_positions[player_name]
+        #sore = self.calculate_hand_value(player_name)
+        x, y = position[0], position[1]
+        self.pen.penup()
+        self.pen.goto(x, y)
+        self.pen.pendown()
+        self.pen.write(f"{player_name}'s hand: ", False, font=("Courier New", 13, "normal"))
+        #self.pen.write(score)
+        self.pen.penup()
+        y -= 30
+        for card in hand:
+            self.pen.goto(x, y)
+            self.pen.pendown()
+            self.pen.write(str(card), False, font=("Courier New", 13, "normal"))
+            self.pen.penup()
+            y -= 20
+
+
+
+
+
+
+
+
+
 
 
 
