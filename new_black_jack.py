@@ -1,11 +1,13 @@
-from class_render import Deck
-from class_render import Card
-from class_render import Player
-from class_render import Dealer
-from class_render import PlayBoard
+from class_render1 import Deck
+from class_render1 import Card
+from class_render1 import Player
+from class_render1 import Dealer
+from class_render1 import Money
+from class_render1 import PlayBoard
 import turtle
 
 
+money = Money(0, 1000)
 game_on = True
 
 while game_on:
@@ -20,7 +22,8 @@ while game_on:
     def play_game():
         deck = Deck()
         deck.shuffle()
-        play_board = PlayBoard()
+        play_board = PlayBoard(money)
+
         dealer = Dealer("Dealer", play_board)
         player = Player("Player", play_board)
         player.add_card(deck.deal_one())
@@ -35,6 +38,14 @@ while game_on:
             else:
                 game_on = False
 
+        player.show_hand()
+        amount =turtle.textinput(f"Blackjack", "You got " + str(money.balance) + " credits. Make your Bet: ")
+        if int(amount) >= 0:
+            money.bet(amount)
+            play_board.render_money("Player")
+        else:
+             amount = int(turtle.textinput("Blackjack", "Make your Bet: "))
+
         while not player.has_lost():
             player.show_hand()
             choice = turtle.textinput("Blackjack", "Take another card? (y/n)") # ТУТ ЗАПРАЦЮВАВ ІНПУТ У ВІКНІ, ТРЕБА ЗРОБИТИ ЩОБ І ІНШИЙ ІНПУТ БУВ У ВІКНАХ
@@ -45,6 +56,7 @@ while game_on:
 
         if player.has_lost():
             print(f"Player got over 21 and lost!")
+            money.lose()
             return play_again()
         else:
            dealer.show_hand()
@@ -52,18 +64,25 @@ while game_on:
                 dealer.add_card(deck.deal_one())
                 dealer.show_hand() 
            if dealer.calculate_hand_value() == 21:
+                money.lose()
                 print("Dealer got Black Jack!")
                 return play_again()
            elif dealer.calculate_hand_value() > 21:
-                print(f"Dealer got {dealer.calculate_hand_value()} and lost!")
-                return play_again()
+               money.win()
+               print(f"Dealer got {dealer.calculate_hand_value()} and lost!")
+               return play_again()
            else:
                 if dealer.calculate_hand_value() > player.calculate_hand_value() and dealer.calculate_hand_value() <= 21:
+                    money.lose()
                     print(f"{dealer.calculate_hand_value()} > {player.calculate_hand_value()} dealer wins!")
                     return play_again()
                 elif player.calculate_hand_value() > dealer.calculate_hand_value() and player.calculate_hand_value() <= 21:
+                    money.win()
                     print(f"{player.calculate_hand_value()} > {dealer.calculate_hand_value()} player wins!")
                     return play_again()
  
     game_on = play_game()
     wn.clear()
+
+
+
