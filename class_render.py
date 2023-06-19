@@ -1,5 +1,4 @@
 
-
 import random
 import tkinter as tk
 import turtle
@@ -159,8 +158,31 @@ class Dealer:
         else:
             game_on = False
 
+class Money:
+    def __init__(self,bank,balance):
+        self.bank = bank
+        self.balance = balance
+    def __str__(self):
+        return f"Payer balance: {self.balance}", f"Bank balance: {self.bank}"
+    def win(self):
+        self.balance = self.balance + self.bank
+        print(f"You win: {self.bank}! Payer balance: {self.balance}")
+    def lose(self):
+        self.bank = 0
+        print(f"You lose! Payer balance: {self.balance}")
+    def bet(self,amount):
+        if int(amount) <= self.balance:
+            self.balance = self.balance - int(amount)
+            self.bank = int(amount)*2
+            print(f"Bet Accepted {amount}")
+            print(f"Your balance {self.balance}")
+        else:
+            print("Funds Unavailable!")
+            pass
+
 class PlayBoard:
-    def __init__(self):
+    def __init__(self, money):
+        self.money = money
         self.card_positions = {
             "Player": (-200, -200),  # Позиція тексту гравця
             "Dealer": (-200, +230),  # Позиція тексту дилера
@@ -177,6 +199,19 @@ class PlayBoard:
         self.pen.speed(0)
         self.pen.hideturtle()
         self.hit_button = None
+
+    def render_money(self, Player):
+        position = self.card_positions[Player]
+        x,y = position[0], position[1] +23
+        self.pen.penup()
+        self.pen.goto(x, y)
+        self.pen.pendown()
+        #self.pen.clear()
+        self.pen.write(f"Balance: {self.money.balance}", False, font=("Courier New", 13, "normal"))
+        self.pen.penup()
+        self.pen.goto(-300, 0)
+        self.pen.pendown()
+        self.pen.write(f"Bank: {self.money.bank}", False, font=("Courier New", 13, "normal"))
 
     def render_card_Player(self, Player, card):
         position = self.hand_positions[Player]
@@ -209,16 +244,33 @@ class PlayBoard:
             self.pen.penup()
             y -= 20
 
+class Button:
+    def __init__(self, text, x, y):
+        self.text = text
+        self.x = x
+        self.y = y
+        self.width = 100
+        self.height = 50
 
+    def draw(self):
+        turtle.penup()
+        turtle.goto(self.x, self.y)
+        turtle.pendown()
+        turtle.setheading(0)
+        turtle.fillcolor("white")
+        turtle.begin_fill()
+        for _ in range(2):
+            turtle.forward(self.width)
+            turtle.left(90)
+            turtle.forward(self.height)
+            turtle.left(90)
+        turtle.end_fill()
+        turtle.penup()
+        turtle.goto(self.x + self.width / 2, self.y + self.height / 2)
+        turtle.write(self.text, align="center", font=("Arial", 12, "normal"))
 
-
-
-
-
-
-
-
-
+    def is_clicked(self, x, y):
+        return self.x <= x <= self.x + self.width and self.y <= y <= self.y + self.height
 
 
 
